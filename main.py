@@ -106,8 +106,8 @@ while True:
                         pass
                 subprocess.Popen([r'notepad.exe', filename])
 
-        if event == 'Get API Key':
-            webbrowser.open("https://steamcommunity.com/dev/apikey")
+    if event == 'Get API Key':
+        webbrowser.open("https://steamcommunity.com/dev/apikey")
 
 # ウィンドウの破棄と終了
 window.close()
