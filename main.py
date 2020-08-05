@@ -13,6 +13,8 @@ from pip._vendor import requests
 
 sg.theme('SystemDefault1')
 
+API = URL = ""
+
 try:
     with open('settings', mode='r') as f:
         API = f.readline()
@@ -43,12 +45,14 @@ while True:
         with open('settings', mode='w') as f:
             f.write(apikey + "\n")
             f.write(values["URL"])
-        idurl = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apikey + "&vanityurl=" + values[
-            "URL"]
-        response = requests.get(idurl)
-        jsonData = response.json()
-        if jsonData["response"]["success"] == 1:
-            steamID = jsonData["response"]["steamid"]
+            if not values["URL"].isdecimal():
+                idurl = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apikey + "&vanityurl=" + \
+                        values["URL"]
+                response = requests.get(idurl)
+                jsonData = response.json()
+                steamID = jsonData["response"]["steamid"]
+            else:
+                steamID = values["URL"]
             ownedurl = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=" + apikey + "&steamid=" + steamID + "&format=json"
             response = requests.get(ownedurl)
             jsonData = response.json()
@@ -101,11 +105,9 @@ while True:
                         print("ERROR - " + appName + " (" + str(appid) + ") ex:" + str(e))
                         pass
                 subprocess.Popen([r'notepad.exe', filename])
-        else:
-            sg.popup("Error")
 
-    if event == 'Get API Key':
-        webbrowser.open("https://steamcommunity.com/dev/apikey")
+        if event == 'Get API Key':
+            webbrowser.open("https://steamcommunity.com/dev/apikey")
 
 # ウィンドウの破棄と終了
 window.close()
