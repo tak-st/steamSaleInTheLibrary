@@ -13,12 +13,13 @@ from pip._vendor import requests
 
 sg.theme('SystemDefault1')
 
-API = URL = ""
+API = URL = RTM = ""
 
 try:
     with open('settings', mode='r') as f:
         API = f.readline()
         URL = f.readline()
+        RTM = f.readline()
 except FileNotFoundError:
     pass
 # レイアウトの定義
@@ -26,6 +27,7 @@ layout = [
     [sg.Text('Please Input Steam Data', key="output")],
     [sg.Text('API Key', size=(15, 1)), sg.InputText(API.strip(), key="API"), sg.Button(button_text='Start')],
     [sg.Text('Custom URL', size=(15, 1)), sg.InputText(URL.strip(), key="URL"), sg.Button(button_text='Get API Key')],
+    [sg.Text('Required Time (m)', size=(15, 1)), sg.InputText(RTM.strip(),size=(5,1), key="RTM")],
     [sg.Text('https://steamcommunity.com/id/XXXXX(Custom URL)')]
 ]
 
@@ -42,9 +44,13 @@ while True:
 
     if event == 'Start':
         apikey = values["API"]
+        rtm = values["RTM"]
+        if not rtm.isdecimal():
+            rtm = 0
         with open('settings', mode='w') as f:
             f.write(apikey + "\n")
-            f.write(values["URL"])
+            f.write(values["URL"] + "\n")
+            f.write(values["RTM"])
             if not values["URL"].isdecimal():
                 idurl = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apikey + "&vanityurl=" + \
                         values["URL"]
@@ -58,7 +64,8 @@ while True:
             jsonData = response.json()
             appList = list(range(0))
             for jsonObj in jsonData["response"]["games"]:
-                appList.append(jsonObj["appid"])
+                if int(jsonObj["playtime_forever"]) >= int(rtm):
+                    appList.append(jsonObj["appid"])
             today = datetime.datetime.today()
             appLength = len(appList)
             itemCount = 0
